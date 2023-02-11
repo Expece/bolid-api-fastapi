@@ -12,16 +12,6 @@ class Event(Base):
     humidity = Column(Integer)
 
 
-class Strange_event(Base):
-    __tablename__ = 'strange_events'
-
-    id = Column(Integer, primary_key=True)
-    sensor_id = Column(Integer)
-    name = Column(String, nullable=False)
-    temperature = Column(Integer)
-    humidity = Column(Integer)
-
-
 class Sensor(Base):
     __tablename__ = 'sensor'
 
