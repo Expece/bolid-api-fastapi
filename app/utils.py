@@ -1,4 +1,3 @@
-from typing import Generator
 from app.db.config import Session
 
 

@@ -1,8 +1,17 @@
 from pydantic import BaseModel, validator
-from typing import Optional
+from typing import Optional, TypeVar
 from fastapi import HTTPException
 
-class SensorForm(BaseModel):
+T = TypeVar('T')
+
+
+class SensorInDB(BaseModel):
+    id: int
+    name: Optional[str] = None
+    type: int
+
+
+class SensorSchema(BaseModel):
     name: Optional[str] = None
     type: int
 
@@ -18,4 +27,8 @@ class SensorForm(BaseModel):
         return sensor_type
 
 class RequestSensor(BaseModel):
-    sensors: list[SensorForm]
+    sensors: list[SensorSchema]
+
+class ResponseSchema(BaseModel):
+    detail: str
+    result: Optional[T] = None

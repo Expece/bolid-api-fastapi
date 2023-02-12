@@ -1,10 +1,9 @@
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
+from fastapi_pagination import Params, paginate
 
-from .forms import RequestSensor, SensorForm
+from app.sensors.schema import RequestSensor, SensorSchema
 from app.db.models import Sensor
-
-# from app.sensors.validations import check_sensor_type
+from app.sensors.utils import parse_sensors
 
 
 def create_sensors_by_list(db: Session, import_sensors: RequestSensor):
@@ -22,11 +21,11 @@ def get_sensor_by_id(db: Session, sensor_id: int):
     return db.query(Sensor).filter(Sensor.id == sensor_id).first()
 
 
-def get_sensors(db: Session, skip: int, limit: int):
-    return db.query(Sensor).offset(skip).limit(limit).all()
+def get_all_sensors(db: Session, params: Params):
+    return paginate(parse_sensors(db), params)
 
 
-def update_sensors(db: Session, id: int, sensor: SensorForm):
+def update_sensors(db: Session, id: int, sensor: SensorSchema):
     db.query(Sensor).filter(Sensor.id == id).update({
         'name': sensor.name,
         'type': sensor.type

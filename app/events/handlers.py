@@ -1,39 +1,40 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from fastapi_pagination import Params
 
 from app.utils import get_db
-from .forms import RequestEvents, EventForm
+from .schema import RequestEvent, EventSchema, ResponseSchema
 import app.events.crud as crud
 
 
 router = APIRouter()
 
 
-@router.post('/post', name='')
-async def create_event(request: RequestEvents, db: Session=Depends(get_db)):
-    event = crud.create_event(db, request)
-    return event
+@router.post("", name='', response_model=ResponseSchema)
+async def create_event(request: RequestEvent, db: Session=Depends(get_db)):
+    crud.create_event(db, request)
+    return ResponseSchema(detail="Successfully created data")
 
 
-@router.get('/get', name='')
-async def get_events(skip: int=0, limit: int=100, db: Session=Depends(get_db)):
-    event = crud.get_events(db, skip, limit)
-    return event
+@router.get("", name='', response_model=ResponseSchema)
+async def get_all_events(params: Params = Depends(), db: Session=Depends(get_db)):
+    result = crud.get_all_events(db, params)
+    return ResponseSchema(detail="Successfully fetch events", result=result)
 
 
-@router.get('/get/{id}', name='')
+@router.get("/{id}", name='', response_model=ResponseSchema)
 async def get_event_by_id(id: int, db: Session=Depends(get_db)):
-    event = crud.get_event_by_id(db, id)
-    return event
+    result = crud.get_event_by_id(db, id)
+    return ResponseSchema(detail="Successfully fetch event data by id", result=result)
 
 
-@router.put('/update/{id}', name='')
-async def update_event(id:int, request: EventForm, db: Session=Depends(get_db)):
-    event = crud.updare_event(db, id, request)
-    return event
+@router.put("/{id}", name='', response_model=ResponseSchema)
+async def update_event(id:int, request: EventSchema, db: Session=Depends(get_db)):
+    crud.updare_event(db, id, request)
+    return ResponseSchema(detail="Successfully updated data")
 
 
-@router.delete('/delete/{id}', name='')
+@router.delete("/{id}", name='', response_model=ResponseSchema)
 async def delete_event(id: int, db: Session=Depends(get_db)):
     crud.delete_event(db, id)
-    return HTTPException(status_code=200)
+    return ResponseSchema(detail="Successfully deleted data")
