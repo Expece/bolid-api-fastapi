@@ -3,13 +3,12 @@ from fastapi import HTTPException
 
 from .forms import RequestSensor, SensorForm
 from app.db.models import Sensor
-from app.sensors.validations import check_sensor_type
+
+# from app.sensors.validations import check_sensor_type
 
 
 def create_sensors_by_list(db: Session, import_sensors: RequestSensor):
     for sensor in import_sensors.sensors:
-        if not check_sensor_type(sensor.type):
-            raise HTTPException(status_code=400, detail="sensor type can be between 1 and 3")
         create_sensor(db, Sensor(name=sensor.name, type=sensor.type))
     return sensor
 
@@ -28,8 +27,6 @@ def get_sensors(db: Session, skip: int, limit: int):
 
 
 def update_sensors(db: Session, id: int, sensor: SensorForm):
-    if not check_sensor_type(sensor.type):
-            raise HTTPException(status_code=400, detail="sensor type can be between 1 and 3")
     db.query(Sensor).filter(Sensor.id == id).update({
         'name': sensor.name,
         'type': sensor.type

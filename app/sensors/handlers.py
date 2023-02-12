@@ -5,12 +5,13 @@ from app.utils import get_db
 from .forms import RequestSensor, SensorForm
 import app.sensors.crud as crud
 
+
 router = APIRouter()
 
 
 @router.post('/post', name='')
-async def create_sensor(request: RequestSensor, db: Session = Depends(get_db)):
-    sensor = crud.create_sensors_by_list(db, request)
+async def create_sensor(sensors_request: RequestSensor, db: Session = Depends(get_db)):
+    sensor = crud.create_sensors_by_list(db, sensors_request)
     return sensor
 
 
@@ -27,8 +28,8 @@ async def get_sensor_by_id(id: int, db: Session = Depends(get_db)):
 
 
 @router.put('/update/{id}', name='')
-async def update_sensor(id:int, request: SensorForm, db: Session = Depends(get_db)):
-    sensors = crud.update_sensors(db, id, request)
+async def update_sensor(id:int, updated_sensor: SensorForm, db: Session = Depends(get_db)):
+    sensors = crud.update_sensors(db, id, updated_sensor)
     return sensors
 
 
@@ -36,3 +37,4 @@ async def update_sensor(id:int, request: SensorForm, db: Session = Depends(get_d
 async def delete_sensor(id: int, db: Session = Depends(get_db)):
     crud.delete_sensor(db, id)
     return HTTPException(status_code=200)
+
