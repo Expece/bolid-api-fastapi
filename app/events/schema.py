@@ -6,14 +6,6 @@ from fastapi import HTTPException
 T = TypeVar('T')
 
 
-class EventInDB(BaseModel):
-    id: int
-    sensor_id: int
-    name: str
-    temperature: Optional[float] = None
-    humidity: Optional[float] = None
-
-
 class EventSchema(BaseModel):
     sensor_id: int
     name: str
@@ -54,14 +46,8 @@ class EventSchema(BaseModel):
             detail="Humidity is measured as a percentage from 0 to 100")
         return humidity
 
-class StrangeEventSchema(BaseModel):
-    sensor_id: int
-    name: str
-    temperature: Optional[int] = None
-    humidity: Optional[int] = None
 
-
-class RequestEvent(BaseModel):
+class RequestEvents(BaseModel):
     events: list[EventSchema]
 
 

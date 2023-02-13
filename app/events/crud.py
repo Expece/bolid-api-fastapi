@@ -1,39 +1,39 @@
-from .schema import RequestEvent, EventSchema
+from .schema import RequestEvents, EventSchema
 from sqlalchemy.orm import Session
-from fastapi_pagination import Params, paginate
+from fastapi_pagination import paginate, Params
+from fastapi.encoders import jsonable_encoder
 
-from app.db.models import Event
-from app.events.utils import check_exist_or_create_sensor, parse_events
-
-
-def create_event(db: Session, import_events: RequestEvent):
-    for event in import_events.events:
-        check_exist_or_create_sensor(db, event.sensor_id)
-        _event = Event(sensor_id=event.sensor_id, name=event.name,
-        temperature=event.temperature, humidity=event.humidity)
-        db.add(_event)
-    db.commit()
+from app.db.models import Event, Sensor
+from app.crud_base import BaseCRUD
+from app.sensors.crud import sensors
 
 
-def get_event_by_id(db: Session, id: int):
-    return db.query(Event).filter(Event.id == id).first()
+class EventCRUD(BaseCRUD[Event]):
 
+    def create(self, db: Session, event: EventSchema):
+        self._check_exist_or_create_sensor(db, event.sensor_id)
+        _event = jsonable_encoder(event)
+        db.add(self.model(**_event))
+        db.commit()
+        return _event
 
-def get_all_events(db: Session, params: Params):
-    return paginate(parse_events(db), params)
+    
+    def create_multi(self, db: Session, events: RequestEvents):
+        result = []
+        for event in events.events:
+            self._check_exist_or_create_sensor(db, event.sensor_id)
+            _event = jsonable_encoder(event)
+            result.append(_event)
+            db.add(self.model(**_event))
+        db.commit()
+        return result
+    
 
+    def get_all(self, db: Session, params: Params):
+        return paginate(super().get_all(db), params)
 
-def updare_event(db: Session, id:int, event: EventSchema):
-    db.query(Event).filter(Event.id == id).update({
-        'sensor_id': event.sensor_id,
-        'name': event.name,
-        'temperature': event.temperature,
-        'humidity': event.humidity
-    })
-    db.commit()
+    def _check_exist_or_create_sensor(self, db: Session, sensor_id: int):
+        if not sensors.get(db, sensor_id):
+            sensors.create(db, sensor=Sensor(id=sensor_id, name=None))
 
-
-def delete_event(db: Session, id: int):
-    event = get_event_by_id(db, id)
-    db.delete(event)
-    db.commit()
+events = EventCRUD(Event)

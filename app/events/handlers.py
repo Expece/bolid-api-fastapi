@@ -3,38 +3,44 @@ from sqlalchemy.orm import Session
 from fastapi_pagination import Params
 
 from app.utils import get_db
-from .schema import RequestEvent, EventSchema, ResponseSchema
-import app.events.crud as crud
-
+from .schema import RequestEvents, EventSchema, ResponseSchema
+# import app.events.crud as crud
+from app.events.crud import events
 
 router = APIRouter()
 
 
-@router.post("", name='', response_model=ResponseSchema)
-async def create_event(request: RequestEvent, db: Session=Depends(get_db)):
-    crud.create_event(db, request)
-    return ResponseSchema(detail="Successfully created data")
+@router.post("", name='create event', response_model=ResponseSchema)
+async def create_event(request: EventSchema, db: Session=Depends(get_db)):
+    result = events.create(db, request)
+    return ResponseSchema(detail="Successfully created event", result=result)
 
 
-@router.get("", name='', response_model=ResponseSchema)
+@router.post("/multi", name='create multi events', response_model=ResponseSchema)
+async def create_multi_events(request: RequestEvents, db: Session=Depends(get_db)):
+    result = events.create_multi(db, request)
+    return ResponseSchema(detail="Successfully created multi of event", result=result)
+
+
+@router.get("", name='get all events', response_model=ResponseSchema)
 async def get_all_events(params: Params = Depends(), db: Session=Depends(get_db)):
-    result = crud.get_all_events(db, params)
+    result = events.get_all(db, params)
     return ResponseSchema(detail="Successfully fetch events", result=result)
 
 
-@router.get("/{id}", name='', response_model=ResponseSchema)
+@router.get("/{id}", name='get event by id', response_model=ResponseSchema)
 async def get_event_by_id(id: int, db: Session=Depends(get_db)):
-    result = crud.get_event_by_id(db, id)
-    return ResponseSchema(detail="Successfully fetch event data by id", result=result)
+    result = events.get(db, id)
+    return ResponseSchema(detail="Successfully fetch event by id", result=result)
 
 
-@router.put("/{id}", name='', response_model=ResponseSchema)
+@router.put("/{id}", name='update event by id', response_model=ResponseSchema)
 async def update_event(id:int, request: EventSchema, db: Session=Depends(get_db)):
-    crud.updare_event(db, id, request)
-    return ResponseSchema(detail="Successfully updated data")
+    result = events.update(db, id, request)
+    return ResponseSchema(detail="Successfully updated event", result=result)
 
 
-@router.delete("/{id}", name='', response_model=ResponseSchema)
+@router.delete("/{id}", name='delete event by id', response_model=ResponseSchema)
 async def delete_event(id: int, db: Session=Depends(get_db)):
-    crud.delete_event(db, id)
-    return ResponseSchema(detail="Successfully deleted data")
+    result = events.delete(db, id)
+    return ResponseSchema(detail="Successfully deleted event", result=result)
