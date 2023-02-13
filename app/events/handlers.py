@@ -4,7 +4,6 @@ from fastapi_pagination import Params
 
 from app.utils import get_db
 from .schema import RequestEvents, EventSchema, ResponseSchema
-# import app.events.crud as crud
 from app.events.crud import events
 
 router = APIRouter()
@@ -44,3 +43,9 @@ async def update_event(id:int, request: EventSchema, db: Session=Depends(get_db)
 async def delete_event(id: int, db: Session=Depends(get_db)):
     result = events.delete(db, id)
     return ResponseSchema(detail="Successfully deleted event", result=result)
+
+
+@router.get("/by-sensor-id/{sensor_id}", name='get events by sensor id', response_model=ResponseSchema)
+async def get_events_by_sensor_id(sensor_id: int, db: Session = Depends(get_db)):
+    result = events.get_by_sensor_id(db, sensor_id)
+    return ResponseSchema(detail="Successfully fetch events by sensor id", result=result)

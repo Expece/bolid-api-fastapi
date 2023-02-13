@@ -8,6 +8,7 @@ from app.crud_base import BaseCRUD
 from app.sensors.crud import sensors
 
 
+
 class EventCRUD(BaseCRUD[Event]):
 
     def create(self, db: Session, event: EventSchema):
@@ -31,6 +32,12 @@ class EventCRUD(BaseCRUD[Event]):
 
     def get_all(self, db: Session, params: Params):
         return paginate(super().get_all(db), params)
+
+
+    def get_by_sensor_id(self, db: Session, sensor_id: int):
+        result = db.query(self.model).filter(self.model.sensor_id == sensor_id).all()
+        return result
+    
 
     def _check_exist_or_create_sensor(self, db: Session, sensor_id: int):
         if not sensors.get(db, sensor_id):
