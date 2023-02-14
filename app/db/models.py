@@ -3,6 +3,12 @@ from app.db.config import Base
 import enum
 
 
+class Type(int, enum.Enum):
+    ONE = '1'
+    TWO = '2'
+    THREE = '3'
+
+
 class Event(Base):
     __tablename__ = 'events'
 
@@ -12,6 +18,8 @@ class Event(Base):
     temperature = Column(Float)
     humidity = Column(Float)
 
+    def get_allowed_filters():
+        return ['temperature', 'humidity']
 
 class Sensor(Base):
     __tablename__ = 'sensor'

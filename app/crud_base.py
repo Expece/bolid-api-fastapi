@@ -34,8 +34,8 @@ class BaseCRUD(Generic[ModelType]):
         return obj
     
 
-    def get_all(self, db: Session, offset: int=0, limit: int=100) -> list[ModelType]:
-        objs = db.query(self.model).offset(offset).limit(limit).all()
+    def get_all(self, db: Session) -> list[ModelType]:
+        objs = db.query(self.model).order_by(self.model.id, self.model.name).all()
         return objs
 
 

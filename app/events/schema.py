@@ -52,5 +52,6 @@ class RequestEvents(BaseModel):
 
 
 class ResponseSchema(BaseModel):
+    status_code: int = 200
     detail: str
     result: Optional[T] = None
