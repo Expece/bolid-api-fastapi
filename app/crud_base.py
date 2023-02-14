@@ -11,18 +11,21 @@ ModelSchemaType = TypeVar('ModelSchemaType', bound=BaseModel)
 
 
 class BaseCRUD(Generic[ModelType]):
+    """Base class in which CRUD operations are implemented"""
 
     def __init__(self, model: Type[ModelType]):
         self.model = model
     
     
     def create(self, db: Session, obj: ModelSchemaType) -> None:
+        """Create object"""
         obj_data = jsonable_encoder(obj)
         db.add(self.model(**obj_data))
         db.commit()
 
     
     def create_multi(self, db: Session, objs: ModelSchemaType) -> None:
+        """Create multi objects"""
         _objs = jsonable_encoder(objs)
         for obj in _objs:
             db.add(self.model(**obj))
@@ -30,16 +33,19 @@ class BaseCRUD(Generic[ModelType]):
     
     
     def get(self, db: Session, id: Any) -> ModelType | None:
+        """Return object from database by id"""
         obj = db.query(self.model).filter(self.model.id == id).one_or_none()
         return obj
     
 
     def get_all(self, db: Session) -> list[ModelType]:
+        """Retunrb all objects from database"""
         objs = db.query(self.model).order_by(self.model.id, self.model.name).all()
         return objs
 
 
     def update(self, db: Session, id: Any, obj: ModelSchemaType) -> None:
+        """Update object in database"""
         obj_data = jsonable_encoder(obj)
         db_obj = self.get(db, id)
         if not db_obj:
@@ -52,6 +58,7 @@ class BaseCRUD(Generic[ModelType]):
 
 
     def delete(self, db: Session, id: int) -> None:
+        """Delete object from database"""
         obj = self.get(db, id)
         db.delete(obj)
         db.commit

@@ -12,5 +12,7 @@ models.Base.metadata.create_all(engine)
 app = FastAPI(title=PROJECT_NAME,
             version=VERSION)
 
+# events router
 app.include_router(events_router, prefix='/events', tags=["Events"])
+# sensors router
 app.include_router(sensors_router, prefix='/sensors', tags=["Sensors"])

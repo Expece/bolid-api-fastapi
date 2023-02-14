@@ -5,6 +5,7 @@ from app.db.models import Event
 
 
 class EventFilter(Filter):
+    """Class for Events Filters"""
     temperature__gte: Optional[float] = Field(default=0,
         ge=0,
         le=100,
