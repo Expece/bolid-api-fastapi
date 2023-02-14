@@ -2,6 +2,7 @@ from pydantic import BaseModel, validator
 from typing import Optional, TypeVar
 from fastapi import HTTPException
 
+
 T = TypeVar('T')
 
 

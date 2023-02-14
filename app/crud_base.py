@@ -2,13 +2,13 @@ from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
 from typing import TypeVar, Any, Type, Generic
 from pydantic import BaseModel
-
+from fastapi import HTTPException
 
 
 ModelType = TypeVar('ModelType')
-CreateSchemaType = TypeVar('CreateSchemaType', bound=BaseModel)
-UpdateSchemaType = TypeVar('UpdateSchemaType', bound=BaseModel)
-CreateMultiSchematype = TypeVar('CreateMultiSchematype', bound=BaseModel)
+ModelSchemaType = TypeVar('ModelSchemaType', bound=BaseModel)
+
+
 
 class BaseCRUD(Generic[ModelType]):
 
@@ -16,49 +16,48 @@ class BaseCRUD(Generic[ModelType]):
         self.model = model
     
     
-    def create(self, db: Session, obj: CreateSchemaType):
+    def create(self, db: Session, obj: ModelSchemaType):
         obj_data = jsonable_encoder(obj)
         db.add(self.model(**obj_data))
         db.commit()
-        return obj_data
 
     
-    def create_multi(self, db: Session, objs: CreateMultiSchematype):
-        result = []
+    def create_multi(self, db: Session, objs: ModelSchemaType):
         _objs = jsonable_encoder(objs)
         for obj in _objs:
-            result.append(obj)
             db.add(self.model(**obj))
         db.commit
-        return result
     
     
-    def get(self, db: Session, id: Any) -> ModelType:
-        return db.query(self.model).filter(self.model.id == id).first()
+    def get(self, db: Session, id: Any) -> ModelType | None:
+        obj = db.query(self.model).filter(self.model.id == id).one_or_none()
+        return obj
     
 
     def get_all(self, db: Session, offset: int=0, limit: int=100) -> list[ModelType]:
-        return db.query(self.model).offset(offset).limit(limit).all()
+        objs = db.query(self.model).offset(offset).limit(limit).all()
+        return objs
 
 
-    def update(self, db: Session, id: Any, obj: UpdateSchemaType):
+    def update(self, db: Session, id: Any, obj: ModelSchemaType):
         obj_data = jsonable_encoder(obj)
-        db_obj = db.query(self.model).filter(self.model.id == id).first()
+        db_obj = self.get(db, id)
+        if not db_obj:
+            raise HTTPException(status_code=404, detail="Not Found")
 
         db_obj = self._set_new_atr(db_obj, obj, obj_data)
         
         db.add(db_obj)
         db.commit()
-        return self.get(db, id)
 
 
     def delete(self, db: Session, id: int):
         obj = self.get(db, id)
         db.delete(obj)
         db.commit
-        return obj
     
-    def _set_new_atr(self, db_obj: ModelType, obj: UpdateSchemaType, obj_data: Any):
+    
+    def _set_new_atr(self, db_obj: ModelType, obj: ModelSchemaType, obj_data: Any) -> ModelType:
         if isinstance(obj, dict):
             updated_obj = obj
         else:
@@ -67,3 +66,5 @@ class BaseCRUD(Generic[ModelType]):
         for field in obj_data:
             setattr(db_obj, field, updated_obj[field])
         return db_obj
+    
+        
