@@ -16,13 +16,13 @@ class BaseCRUD(Generic[ModelType]):
         self.model = model
     
     
-    def create(self, db: Session, obj: ModelSchemaType):
+    def create(self, db: Session, obj: ModelSchemaType) -> None:
         obj_data = jsonable_encoder(obj)
         db.add(self.model(**obj_data))
         db.commit()
 
     
-    def create_multi(self, db: Session, objs: ModelSchemaType):
+    def create_multi(self, db: Session, objs: ModelSchemaType) -> None:
         _objs = jsonable_encoder(objs)
         for obj in _objs:
             db.add(self.model(**obj))
@@ -39,7 +39,7 @@ class BaseCRUD(Generic[ModelType]):
         return objs
 
 
-    def update(self, db: Session, id: Any, obj: ModelSchemaType):
+    def update(self, db: Session, id: Any, obj: ModelSchemaType) -> None:
         obj_data = jsonable_encoder(obj)
         db_obj = self.get(db, id)
         if not db_obj:
@@ -51,7 +51,7 @@ class BaseCRUD(Generic[ModelType]):
         db.commit()
 
 
-    def delete(self, db: Session, id: int):
+    def delete(self, db: Session, id: int) -> None:
         obj = self.get(db, id)
         db.delete(obj)
         db.commit

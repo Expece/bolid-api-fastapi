@@ -18,8 +18,6 @@ class Event(Base):
     temperature = Column(Float)
     humidity = Column(Float)
 
-    def get_allowed_filters():
-        return ['temperature', 'humidity']
 
 class Sensor(Base):
     __tablename__ = 'sensor'
