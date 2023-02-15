@@ -1,3 +1,5 @@
+# preferably run with an empty database
+
 import urllib.error
 import urllib.request
 import urllib.parse

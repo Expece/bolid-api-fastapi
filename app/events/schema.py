@@ -7,8 +7,8 @@ T = TypeVar('T')
 
 
 class EventSchema(BaseModel):
-    sensor_id: int
-    name: str
+    sensor_id: int = "sensor_id"
+    name: str = "name"
     temperature: Optional[float] = None
     humidity: Optional[float] = None
 

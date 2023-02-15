@@ -20,14 +20,21 @@ async def create_sensor(new_sensor: SensorSchema, db: Session = Depends(get_db))
 
 @router.post("/multi", name='create sensors', response_model=ResponseSchema)
 async def create_multi_sensors(request: RequestSensor, db: Session = Depends(get_db)):
-    """Create multi sensors"""
+    """Create multi sensors. Input to "sensors" list of data"""
     sensors_service.create_multi(db, request)
     return ResponseSchema(detail="Successfully created data")
 
 
 @router.get("", name='get all sensors', response_model=ResponseSchema)
 async def get_all_sensors(params: Params = Depends(), db: Session = Depends(get_db)):
-    """Return all sensors broken down by pages"""
+    """Return all sensors broken down by pages. Sensors are sorted by id.
+        - result: {
+            - "items": [Sensors],
+            - "total": int,
+            - "page": int,
+            - "size": int,
+            - "pages": int
+        - }"""
     result = sensors_service.get_all(db, params)
     if not result['items']:
         raise HTTPException(status_code=404, detail="Not Found")
