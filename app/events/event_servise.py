@@ -54,7 +54,7 @@ class EventServise(BaseCRUD[Event]):
         self._check_exist_or_create_sensor(db, sensor_id=event.sensor_id)
         super().update(db, id, event)
 
-    def get_by_sensor_id(self, db: Session, sensor_id: int) -> list[Event] | list:
+    def get_by_sensor_id(self, db: Session, sensor_id: int) -> list[Event]:
         """Return event by sensor id"""
         return db.query(self.model).filter(self.model.sensor_id == sensor_id).all()
     
@@ -69,7 +69,7 @@ class EventServise(BaseCRUD[Event]):
         if not sensors_service.get(db, sensor_id):
             sensors_service.create(db, SensorSchema(id=sensor_id))
 
-    def sort_events(self, events: list | dict) -> list[dict]:
+    def sort_events(self, events: list) -> list[dict]:
         """
         Retuen list of events in format {
             id,

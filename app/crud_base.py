@@ -30,7 +30,7 @@ class BaseCRUD(Generic[ModelType]):
             self.create(db, obj)
     
     
-    def get(self, db: Session, id: Any) -> ModelType | None:
+    def get(self, db: Session, id: Any) -> ModelType:
         """Return object from database by id"""
         obj = db.query(self.model).filter(self.model.id == id).first()
         return obj

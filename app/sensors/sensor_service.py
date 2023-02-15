@@ -42,7 +42,7 @@ class SensorService(BaseCRUD[Sensor]):
         return super().get_all(db)
 
 
-    def sort_sensors(self, sensors: list | dict) -> list[dict]:
+    def sort_sensors(self, sensors: list) -> list[dict]:
         """
         Retuen list of sensors in format {
             id,
