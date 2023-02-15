@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from fastapi.encoders import jsonable_encoder
 from typing import TypeVar, Any, Type, Generic
 from pydantic import BaseModel
@@ -22,19 +23,16 @@ class BaseCRUD(Generic[ModelType]):
         obj_data = jsonable_encoder(obj)
         db.add(self.model(**obj_data))
         db.commit()
-
     
     def create_multi(self, db: Session, objs: ModelSchemaType) -> None:
         """Create multi objects"""
-        _objs = jsonable_encoder(objs)
-        for obj in _objs:
-            db.add(self.model(**obj))
-        db.commit
+        for obj in objs:
+            self.create(db, obj)
     
     
     def get(self, db: Session, id: Any) -> ModelType | None:
         """Return object from database by id"""
-        obj = db.query(self.model).filter(self.model.id == id).one_or_none()
+        obj = db.query(self.model).filter(self.model.id == id).first()
         return obj
     
 
@@ -44,12 +42,9 @@ class BaseCRUD(Generic[ModelType]):
         return objs
 
 
-    def update(self, db: Session, id: Any, obj: ModelSchemaType) -> None:
-        """Update object in database"""
+    def update(self, db: Session, id: Any, obj: ModelSchemaType):
         obj_data = jsonable_encoder(obj)
-        db_obj = self.get(db, id)
-        if not db_obj:
-            raise HTTPException(status_code=404, detail="Not Found")
+        db_obj = db.query(self.model).filter(self.model.id == id).first()
 
         db_obj = self._set_new_atr(db_obj, obj, obj_data)
         
@@ -57,14 +52,12 @@ class BaseCRUD(Generic[ModelType]):
         db.commit()
 
 
-    def delete(self, db: Session, id: int) -> None:
-        """Delete object from database"""
-        obj = self.get(db, id)
+    def delete(self, db: Session, id: int):
+        obj = db.query(self.model).filter(self.model.id == id).first()
         db.delete(obj)
         db.commit
     
-    
-    def _set_new_atr(self, db_obj: ModelType, obj: ModelSchemaType, obj_data: Any) -> ModelType:
+    def _set_new_atr(self, db_obj: ModelType, obj: ModelSchemaType, obj_data: Any):
         if isinstance(obj, dict):
             updated_obj = obj
         else:
@@ -73,5 +66,9 @@ class BaseCRUD(Generic[ModelType]):
         for field in obj_data:
             setattr(db_obj, field, updated_obj[field])
         return db_obj
+    
+    def _get_last_id(self, db: Session):
+        return db.query(self.model).order_by(desc(self.model.id)).first().id
+    
     
         

@@ -15,8 +15,8 @@ router = APIRouter()
 @router.post("", name='create event', response_model=ResponseSchema)
 async def create_event(request: EventSchema, db: Session=Depends(get_db)):
     """Create event"""
-    event_service.create(db, request)
-    return ResponseSchema(detail="Successfully created event")
+    result = event_service.create(db, request)
+    return ResponseSchema(detail="Successfully created event", result=result)
 
 
 @router.post("/multi", name='create multi events', response_model=ResponseSchema)

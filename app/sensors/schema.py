@@ -6,15 +6,9 @@ from fastapi import HTTPException
 T = TypeVar('T')
 
 
-class SensorInDB(BaseModel):
-    id: int
+class UpdateSensorSchema(BaseModel):
     name: Optional[str] = None
-    type: int
-
-
-class SensorSchema(BaseModel):
-    name: Optional[str] = None
-    type: int
+    type: int = 1
 
     @validator('type', pre=True)
     def type_validator(cls, sensor_type):
@@ -26,6 +20,9 @@ class SensorSchema(BaseModel):
         if sensor_type not in types:
             raise HTTPException(status_code=400, detail="Sensor type can be between 1 and 3")
         return sensor_type
+
+class SensorSchema(UpdateSensorSchema):
+    id: int
 
 class RequestSensor(BaseModel):
     sensors: list[SensorSchema]

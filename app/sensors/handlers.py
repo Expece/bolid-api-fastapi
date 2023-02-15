@@ -4,7 +4,7 @@ from fastapi_pagination import Params
 from fastapi import HTTPException
 
 from app.utils import get_db
-from app.sensors.schema import RequestSensor, SensorSchema, ResponseSchema
+from app.sensors.schema import RequestSensor, SensorSchema, ResponseSchema, UpdateSensorSchema
 from app.sensors.sensor_service import sensors_service
 
 
@@ -12,16 +12,16 @@ router = APIRouter()
 
 
 @router.post("", name='create sensor', response_model=ResponseSchema)
-async def create_sensor(sensors_request: SensorSchema, db: Session = Depends(get_db)):
+async def create_sensor(new_sensor: SensorSchema, db: Session = Depends(get_db)):
     """Create sensor"""
-    sensors_service.create(db, sensors_request)
+    sensors_service.create(db, new_sensor)
     return ResponseSchema(detail="Successfully created data")
 
 
-@router.post("/multi", name='create sensor', response_model=ResponseSchema)
-async def create_multi_sensors(sensors_request: RequestSensor, db: Session = Depends(get_db)):
+@router.post("/multi", name='create sensors', response_model=ResponseSchema)
+async def create_multi_sensors(request: RequestSensor, db: Session = Depends(get_db)):
     """Create multi sensors"""
-    sensors_service.create_multi(db, sensors_request)
+    sensors_service.create_multi(db, request)
     return ResponseSchema(detail="Successfully created data")
 
 
@@ -43,14 +43,14 @@ async def get_sensor_by_id(id: int, db: Session = Depends(get_db)):
     return ResponseSchema(detail="Successfully fetch sensor data by id", result=result)
 
 
-@router.put("{id}", name='update sensor by id', response_model=ResponseSchema)
-async def update_sensor(id:int, updated_sensor: SensorSchema, db: Session = Depends(get_db)):
+@router.put("/{id}", name='update sensor by id', response_model=ResponseSchema)
+async def update_sensor(id:int, updated_sensor: UpdateSensorSchema, db: Session = Depends(get_db)):
     """Update sensor by id"""
     sensors_service.update(db, id, updated_sensor)
     return ResponseSchema(detail="Successfully updated data")
 
 
-@router.delete("{id}", name='delete sensor by id', response_model=ResponseSchema)
+@router.delete("/{id}", name='delete sensor by id', response_model=ResponseSchema)
 async def delete_sensor(id: int, db: Session = Depends(get_db)):
     """Delete sensor by id"""
     sensors_service.delete(db, id)
