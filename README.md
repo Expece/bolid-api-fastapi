@@ -13,7 +13,7 @@ API сервис.
 ```
 pip install -r requirements.txt 
 uvicorn app.main:app    
+python tests/test.py
 ```
-    > python tests/test.py
 
 Подронее о задании в __task__.
